@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.20;
 
 // 1. Create a payment collection function.
@@ -18,13 +19,19 @@ contract FundMe {
 
     mapping (address => uint256) public fundersToAmount;
 
+    bool public getFundSuccess = false;
+
     address owner;
+
+    address erc20Addr;
 
     // lock-up period 
     uint256 deploymentTimestamp;
     uint256 lockedTime;
 
     AggregatorV3Interface internal dataFeed;
+
+    
 
 
     constructor(uint256 _lockedTime){
@@ -96,7 +103,17 @@ contract FundMe {
         (success, ) = payable(msg.sender).call{value:fundersToAmount[msg.sender]}("");
         require(success,"tx fail");
         fundersToAmount[msg.sender] = 0;
+        getFundSuccess = true;
 
+    }
+
+    function setFundersToAmount(address funder, uint256 amountToUpdate) external  {
+        require(msg.sender == erc20Addr,"You do not have permission to call this function");
+        fundersToAmount[funder] = amountToUpdate;
+    }
+
+    function setErc20Addr(address addr) public onlyOwner{
+        erc20Addr = addr;
     }
 
 
